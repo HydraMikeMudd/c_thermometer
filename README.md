@@ -16,3 +16,11 @@ This repo is for a small project to create a thermostat using some hobbiest part
 This part is a clone of a similar Waveshare e-Paper HAT. Thus, to set up the device, the following wiki instructions can be followed: https://www.waveshare.com/wiki/2.13inch_e-Paper_HAT_Manual. Important note: the SDI Pin is the same the DIN pin on the documentation. The rest of the pins should have similar naming.
 
 For the Raspiberry Pi pin out diagram, see the following: https://pinout.xyz/
+
+## DHT11 Hardware Setup
+
+The following pin connections should be sufficient:
+
+- V -> 5v Power (Pin 2 or 4 on Pi)
+- G -> Ground (Pin 6 on Pi)
+- S -> GPIO 4 (Pin 7 on Pi)
