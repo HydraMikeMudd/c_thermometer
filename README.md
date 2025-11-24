@@ -28,3 +28,7 @@ The following pin connections should be sufficient:
 ## Resources
 
 DHT11 Datasheet: https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf
+
+## TODO
+
+New dht11.h driver does read the GPIO correctly. However, timing is off. Sometimes, I am able to get a reading on initialization of script but uncommon. dht11_read_response needs updating to more reliable method. Verified sensor worked with python script.

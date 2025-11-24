@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <wiringPi.h>
+#include <stdio.h>
 
 #define SIGNAL_PIN 7
 // DHT11 waits 80us plus 5 variable iterations to read 40 bits
@@ -46,6 +47,7 @@ void dht11_read_response() {
 
 		if ((i >= 4) && (i % 2 == 0)) {
 			// Avoid first response signals and ensures reading voltage length
+			printf("Counter: %d\n", wait_counter);
 			dht11_data[bits_read/8] <<= 1;
 			if (wait_counter > ONE_BIT_THRESHOLD) {
 				dht11_data[bits_read/8] |= 1;

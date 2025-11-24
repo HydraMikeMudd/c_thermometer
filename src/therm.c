@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <wiringPi.h>
 
-#define PRINTOUT_DELAY 2000
+#define PRINTOUT_DELAY 3000
 
 int main(void) {
 	wiringPiSetup();
