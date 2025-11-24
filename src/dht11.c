@@ -7,7 +7,7 @@
 // DHT11 waits 80us plus 5 variable iterations to read 40 bits
 #define MAX_TIMINGS 85 
 // Threshold that determines if bit is 1 or 0, possibly adjust later
-#define ONE_BIT_THRESHOLD 16
+#define ONE_BIT_THRESHOLD 28 
 
 static int dht11_data[5] = { 0, 0, 0, 0 };
 static uint8_t last_state = HIGH;
@@ -44,7 +44,7 @@ void dht11_read_response() {
 			break;
 		}
 
-		if ((i >= 4) && (i % 2 == 0) {
+		if ((i >= 4) && (i % 2 == 0)) {
 			// Avoid first response signals and ensures reading voltage length
 			dht11_data[bits_read/8] <<= 1;
 			if (wait_counter > ONE_BIT_THRESHOLD) {
@@ -74,17 +74,17 @@ void dht11_probe() {
 temp_data dht11_get_data() {
 	temp_data result;
 
-	if ((bits_read >= 40) && (dht11_data[4] == ((dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF)) {
-		temp_data.celsius_temp = dht11_data[2];
-		temp_data.fahrenheit_temp = dht11_data[2] * 9. / 5. + 32;
-		temp_data.humidity_whole = dht11_data[0];
-		temp_data.humidity_decimal = dht11_data[1];
+	if ((bits_read >= 40) && (dht11_data[4] == ((dht11_data[0] + dht11_data[1] + dht11_data[2] + dht11_data[3]) & 0xFF))) {
+		result.celsius_temp = dht11_data[2];
+		result.fahrenheit_temp = dht11_data[2] * 9. / 5. + 32;
+		result.humidity_whole = dht11_data[0];
+		result.humidity_decimal = dht11_data[1];
 	}
 	else {
-		temp_data.celsius_temp = -1;
-		temp_data.fahrenheit_temp = -1.0;
-		temp_data.humidity_whole = -1;
-		temp_data.humidity_decimal = -1;
+		result.celsius_temp = -1;
+		result.fahrenheit_temp = -1.0;
+		result.humidity_whole = -1;
+		result.humidity_decimal = -1;
 	}
 
 	return result;

@@ -1,5 +1,6 @@
 #include <dht11.h>
 #include <stdio.h>
+#include <wiringPi.h>
 
 #define PRINTOUT_DELAY 2000
 
