@@ -24,3 +24,7 @@ The following pin connections should be sufficient:
 - V -> 5v Power (Pin 2 or 4 on Pi)
 - G -> Ground (Pin 6 on Pi)
 - S -> GPIO 4 (Pin 7 on Pi)
+
+## Resources
+
+DHT11 Datasheet: https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf
