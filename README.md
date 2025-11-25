@@ -32,3 +32,7 @@ DHT11 Datasheet: https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-She
 ## TODO
 
 New dht11.h driver does read the GPIO correctly. However, timing is off. Sometimes, I am able to get a reading on initialization of script but uncommon. dht11_read_response needs updating to more reliable method. Verified sensor worked with python script.
+
+## Notes
+
+Added code to main function to rise the process priority to highest level. This seemed to help some but only for first iteration normally. Changing the wait period between polling didn't seem to help. A larger threshold for 1 seems to work most consistently so far.

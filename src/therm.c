@@ -3,7 +3,7 @@
 #include <sched.h>
 #include <wiringPi.h>
 
-#define PRINTOUT_DELAY 3000
+#define PRINTOUT_DELAY 5000
 
 int main(void) {
 

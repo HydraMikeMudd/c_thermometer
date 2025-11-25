@@ -8,7 +8,7 @@
 // DHT11 waits 80us plus 5 variable iterations to read 40 bits
 #define MAX_TIMINGS 85 
 // Threshold that determines if bit is 1 or 0, possibly adjust later
-#define ONE_BIT_THRESHOLD 28 
+#define ONE_BIT_THRESHOLD 55 
 
 static int dht11_data[5] = { 0, 0, 0, 0 };
 static uint8_t last_state = HIGH;
