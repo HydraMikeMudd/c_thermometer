@@ -1,11 +1,21 @@
 #include <dht11.h>
 #include <stdio.h>
+#include <sched.h>
 #include <wiringPi.h>
 
 #define PRINTOUT_DELAY 3000
 
 int main(void) {
-	wiringPiSetup();
+
+	if (wiringPiSetup() == -1) {
+		printf("WiringPi setup failed\n");
+		return 1;
+	}
+
+	// Set high priority
+	struct sched_param sch_params;
+	sch_params.sched_priority = 99;
+	sched_setscheduler(0, SCHED_FIFO, &sch_params);
 
 	temp_data curr_data;
 
