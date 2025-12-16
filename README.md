@@ -28,10 +28,12 @@ The following pin connections should be sufficient:
 ## Resources
 
 DHT11 Datasheet: https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf
+BME280 Datasheet: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
 
 ## TODO
 
-New dht11.h driver does read the GPIO correctly. However, timing is off. Sometimes, I am able to get a reading on initialization of script but uncommon. dht11_read_response needs updating to more reliable method. Verified sensor worked with python script.
+~~New dht11.h driver does read the GPIO correctly. However, timing is off. Sometimes, I am able to get a reading on initialization of script but uncommon. dht11_read_response needs updating to more reliable method. Verified sensor worked with python script.~~
+Due to DHT11 is unreliable on Linux OS, implementing driver for BME280 sensor instead.
 
 ## Notes
 
