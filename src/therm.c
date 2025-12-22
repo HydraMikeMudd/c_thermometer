@@ -1,40 +1,63 @@
-#include <dht11.h>
+#include "bme280_driver.h"
 #include <stdio.h>
-#include <sched.h>
-#include <wiringPi.h>
+#include <signal.h>
+#include <unistd.h>
 
-#define PRINTOUT_DELAY 5000
+
+#define PRINTOUT_DELAY 5
+#define I2C_BUS "/dev/i2c-1"
+
+volatile int keep_running = 1;
+
+void handle_signal(int signal) {
+	keep_running = 0;
+}
 
 int main(void) {
-
-	if (wiringPiSetup() == -1) {
-		printf("WiringPi setup failed\n");
+	
+	printf("Initializing I2C bus...\n");
+	int bus_fd = i2c_bus_init(I2C_BUS);
+	if (bus_fd < 0) {
+		printf("Failed to initialize I2C bus\n");
 		return 1;
 	}
 
-	// Set high priority
-	struct sched_param sch_params;
-	sch_params.sched_priority = 99;
-	sched_setscheduler(0, SCHED_FIFO, &sch_params);
+	printf("Connecting to BME280 device...\n");
+	i2c_device_t bme280_device;
+	bme280_device.bus_fd = bus_fd;
+	bme280_device.device_address = BME280_I2C_ADDRESS;
 
-	temp_data curr_data;
-
-	while (1) {
-		printf("Probing DHT11...\n");
-		dht11_probe();
-		curr_data = dht11_get_data();
-
-		if (curr_data.celsius_temp == -1 || curr_data.humidity_whole == -1) {
-			printf("Invalid data\n");
-		}
-		else {
-			printf("Humidity = %d.%d\n", curr_data.humidity_whole, curr_data.humidity_decimal);
-			printf("Temperature Celsius = %d C\n", curr_data.celsius_temp);
-			printf("Temperature Fahrenheit = %.1f F\n", curr_data.fahrenheit_temp);
-		}
-
-		delay(PRINTOUT_DELAY);
+	if (bme280_connect(&bme280_device) < 0) {
+		printf("Failed to connect to BME280 device\n");
+		return 1;
 	}
+
+	printf("Configuring BME280 device...\n");
+	bme280_calib_data_t calib_data;
+	if (bme280_config(&bme280_device, &calib_data) < 0) {
+		printf("Failed to configure BME280 device\n");
+		return 1;
+	}
+
+	signal(SIGINT, handle_signal);
+
+
+	while (keep_running) {
+		printf("Reading sensor data...\n");
+		bme280_data_t sensor_data;
+		if (bme280_read_data(&bme280_device, &calib_data, &sensor_data) < 0) {
+			printf("Failed to read data from BME280 device\n");
+			return 1;
+		}
+		printf("Temperature: %.2f °C or %.2f °F, Humidity: %.2f %%\n", sensor_data.temperature, sensor_data.temperature_f, sensor_data.humidity);
+		printf("Pressure: %.2f Pa\n", sensor_data.pressure);
+		sleep(PRINTOUT_DELAY);
+	}
+
+
+	bme280_sleep(&bme280_device);
+	i2c_bus_close(bus_fd);
+	printf("Exiting program.\n");
 
 	return 0;
 }
