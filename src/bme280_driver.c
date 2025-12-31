@@ -5,13 +5,13 @@
 // Initialize the I2C device and reset BME280 sensor
 int bme280_connect(i2c_device_t *device) {
 	// Initialize I2C device
-	if (i2c_init_device(device) != 0) {
+	if (i2c_connect_device(device) != 0) {
 		return -1;
 	}
 
 	// Reset BME280 sensor
 	if (i2c_register_write(device, BME280_RESET_REG, BME280_RESET_CMD) != 0) {
-		return -1;
+		return -2;
 	}
 
 	// Sleep for 5 ms to allow sensor to reset

@@ -25,10 +25,11 @@ int main(void) {
 	printf("Connecting to BME280 device...\n");
 	i2c_device_t bme280_device;
 	bme280_device.bus_fd = bus_fd;
-	bme280_device.device_address = BME280_I2C_ADDRESS;
-
-	if (bme280_connect(&bme280_device) < 0) {
-		printf("Failed to connect to BME280 device\n");
+	bme280_device.device_address = BME280_I2C_ADDR;
+	
+	int result = bme280_connect(&bme280_device);
+	if (result < 0) {
+		printf("Failed to connect to BME280 device. Error Code: %d\n", result);
 		return 1;
 	}
 

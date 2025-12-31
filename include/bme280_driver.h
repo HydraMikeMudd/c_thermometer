@@ -3,15 +3,15 @@
 
 #include "i2c_protocol.h"
 
-#define BME280_I2C_ADDR 0x76
+#define BME280_I2C_ADDR 0x77
 #define BME280_RESET_REG 0xE0
 #define BME280_RESET_CMD 0xB6
 #define BME280_CTRL_HUM_REG 0xF2
 #define BME280_CTRL_HUM_VAL 0x01  // Humidity oversampling x1
 #define BME280_CTRL_MEAS_REG 0xF4
-#define BME280_CTRL_MEAS_VAL 0x76 // Temp x2, Pressure x16, Normal mode
+#define BME280_CTRL_MEAS_VAL 0x57 // Temp x2, Pressure x16, Normal mode
 #define BME280_CONFIG_REG 0xF5
-#define BME280_CONFIG_VAL 0x10 // Standby 500ms, IIR Filter to 16
+#define BME280_CONFIG_VAL 0x90 // Standby 500ms, IIR Filter to 16
 #define BME280_BLOCK_1_CALIB_START 0x88
 #define BME280_BLOCK_1_CALIB_LENGTH 26
 #define BME280_BLOCK_2_CALIB_START 0xE1

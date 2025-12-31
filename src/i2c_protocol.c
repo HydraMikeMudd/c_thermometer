@@ -1,5 +1,9 @@
 #include "i2c_protocol.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
@@ -35,9 +39,11 @@ int i2c_register_write(i2c_device_t *device, uint8_t reg, uint8_t value) {
 
 	uint8_t buffer[2];
 	buffer[0] = reg;
-	buffer[2] = value;
-
-	if (write(device->bus_fd, buffer, 2) != 2) {
+	buffer[1] = value;
+	
+	int result = write(device->bus_fd, buffer, 2); 	
+	if (result != 2) {
+		printf("Write Failure Code: %d\n", errno);
 		return -1;
 	}
 
