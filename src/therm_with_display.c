@@ -4,12 +4,19 @@
 #include "Debug.h"
 #include <stdlib.h>
 #include "EPD_2in13_V4.h"
-#include <time.h> 
+#include <time.h>
+
+// Screen Width: 122
+// Screen Height: 250
+// Font 20 Width: 14
+// Font 20 Height: 20
+// Font 24 Width: 17
+// Font 24 height: 24
 
 int main(void)
 {
 
-    Debug("EPD_2in13_V4_test Demo\r\n");
+    Debug("EPD_2in13 Thermometer\r\n");
     if(DEV_Module_Init()!=0){
         return -1;
     }
@@ -34,12 +41,19 @@ int main(void)
     Debug("Paint_NewImage\r\n");
     Paint_NewImage(BlackImage, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 90, WHITE);
 	Paint_Clear(WHITE);
-	
 
-#if 1   //Partial refresh, example shows time
+	// Writing static text
+	
+	Paint_DrawString_EN(140, 15, "waveshare", &Font16, BLACK, WHITE);
+
+	
+	// Partial refresh
 	Paint_NewImage(BlackImage, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 90, WHITE);  
     Debug("Partial refresh\r\n");
     Paint_SelectImage(BlackImage);
+
+	// Writing static text
+    Paint_DrawString_EN(20, 20, "Temp: 52.76 F", &Font24, BLACK, WHITE);
 	
     PAINT_TIME sPaint_time;
     sPaint_time.Hour = 12;
@@ -71,8 +85,8 @@ int main(void)
 		EPD_2in13_V4_Display_Partial(BlackImage);
         DEV_Delay_ms(500);//Analog clock 1s
     }
-#endif
 
+	// Clearing and closing connection
 	Debug("Clear...\r\n");
 	EPD_2in13_V4_Init();
     EPD_2in13_V4_Clear();
