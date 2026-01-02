@@ -64,7 +64,6 @@ Before building, ensure you have the following installed:
     ```
 
 2.  **Compile the code:**
-    *(Adjust the command below based on your Makefile or build system)*
     ```bash
     make TARGET=therm_with_display
     # OR if you don't want to complile with display functionality:
@@ -82,7 +81,7 @@ You can adjust the delay or timeout behavior of the thermometer by modifying val
 
 * **`PRINTOUT_DELAY`**: Time in milliseconds between screen refreshes (default: `2000`).
 * **`I2C_BUS`**: Default BME280 bus is /dev/i2c-1. If different pins were used, modify this value.
-* **'ITERATION_TIMEOUT'**: Default timeout after 7200 iterations of refreshes.
+* **`ITERATION_TIMEOUT`**: Default timeout after 7200 iterations of refreshes.
 
 For modifying the default BME280 config settings, see the bme280_driver.h file.
 
