@@ -1,6 +1,7 @@
 # Compiler settings
 CC = gcc
-CFLAGS = -Wall -Wextra -g
+# Added -DDEBUG to match original makefile
+CFLAGS = -Wall -Wextra -g -O -ffunction-sections -fdata-sections -DDEBUG
 
 # Output executable name
 OUTPUT_NAME = c_therm
@@ -25,22 +26,41 @@ SRCS = $(COMMON_SRCS)
 LIBS =
 
 # --- CONDITIONAL LOGIC ---
-# Only include the library and the driver source files if building the display version
 ifeq ($(TARGET),therm_with_display)
-    # 1. Add the BCM2835 library
-    LIBS += -llgpio -lm
+    # 1. MACROS (Crucial Fix)
+    # The original makefile defines these to tell the code to use the Pi hardware and BCM lib.
+    CFLAGS += -D RPI -D USE_BCM2835_LIB
     
-    # 2. Add the e-Paper driver sources
-    # (We include them here because they likely depend on the library. 
-    #  If we included them in the normal 'therm' build, the linker might error.)
-    DRIVER_SRCS = $(wildcard $(DRIVER_DIR)/Config/*.c) \
-                  $(wildcard $(DRIVER_DIR)/e-Paper/*.c) \
-                  $(wildcard $(DRIVER_DIR)/Fonts/*.c) \
-                  $(wildcard $(DRIVER_DIR)/GUI/*.c)
+    # 2. LIBRARIES
+    # -lbcm2835: The GPIO library
+    # -lm: Math library
+    # --gc-sections: Cleans up unused code
+    LIBS += -Wl,--gc-sections -lbcm2835 -lm
     
-    SRCS += $(DRIVER_SRCS)
+    # 3. DRIVER SOURCES
+    # We must be specific here. The original makefile only picks specific Config files
+    # for the BCM2835 mode. If we wildcard *.c in Config, we might pull in 
+    # conflicting Jetson or Sysfs drivers.
     
-    # 3. Add driver headers to include path
+    # A. Config Files (Matches "RPI_DEV" else block in original makefile)
+    DRIVER_CONFIG = $(DRIVER_DIR)/Config/DEV_Config.c \
+                    $(DRIVER_DIR)/Config/dev_hardware_SPI.c
+    
+    # B. Fonts and GUI (Safe to include all)
+    DRIVER_ASSETS = $(wildcard $(DRIVER_DIR)/Fonts/*.c) \
+                    $(wildcard $(DRIVER_DIR)/GUI/*.c)
+
+    # C. E-Paper Driver (CRITICAL WARNING)
+    # The original makefile picks ONE specific file (e.g., EPD_2in13_V3.c).
+    # If your folder contains ALL the drivers, wildcarding *.c here will cause 
+    # "Multiple Definition" errors.
+    # If you have cleaned the folder to only have your screen's driver, keep this wildcard.
+    # If not, replace the line below with your specific file, e.g.: $(DRIVER_DIR)/e-Paper/EPD_2in13_V3.c
+    DRIVER_EPD = $(wildcard $(DRIVER_DIR)/e-Paper/*.c)
+
+    SRCS += $(DRIVER_CONFIG) $(DRIVER_ASSETS) $(DRIVER_EPD)
+    
+    # 4. INCLUDES
     INCLUDES += -I$(DRIVER_DIR)/Config \
                 -I$(DRIVER_DIR)/e-Paper \
                 -I$(DRIVER_DIR)/Fonts \
@@ -71,8 +91,8 @@ clean:
 	rm -rf $(BUILD_DIR) $(OUTPUT_NAME)
 
 debug:
-	@echo "Target: $(TARGET)"
-	@echo "Libs:   $(LIBS)"
+	@echo "Target:  $(TARGET)"
+	@echo "Flags:   $(CFLAGS)"
 	@echo "Sources: $(SRCS)"
 
 .PHONY: all clean debug
