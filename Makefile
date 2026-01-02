@@ -5,8 +5,7 @@ CFLAGS = -Wall -Wextra -g
 # Output executable name
 OUTPUT_NAME = c_therm
 
-# Default target main file (without extension)
-# Usage: make TARGET=therm_with_display
+# Default target main file
 TARGET ?= therm
 
 # Directories
@@ -15,58 +14,65 @@ INC_DIR = include
 DRIVER_DIR = epaper_driver
 BUILD_DIR = build
 
-# Source paths
-# 1. All .c files in src/ EXCLUDING the main targets (therm.c and therm_with_display.c)
-#    We filter them out specifically to avoid multiple definitions of 'main'.
+# Base Includes
+INCLUDES = -I$(INC_DIR)
+
+# Base Sources (Generic src files, excluding the mains)
 COMMON_SRCS = $(filter-out $(SRC_DIR)/therm.c $(SRC_DIR)/therm_with_display.c, $(wildcard $(SRC_DIR)/*.c))
+SRCS = $(COMMON_SRCS)
 
-# 2. All .c files in the driver subdirectories
-DRIVER_SRCS = $(wildcard $(DRIVER_DIR)/Config/*.c) \
-              $(wildcard $(DRIVER_DIR)/e-Paper/*.c) \
-              $(wildcard $(DRIVER_DIR)/Fonts/*.c) \
-              $(wildcard $(DRIVER_DIR)/GUI/*.c)
+# Libraries variable (starts empty)
+LIBS =
 
-# 3. The specific main file chosen by the TARGET variable
+# --- CONDITIONAL LOGIC ---
+# Only include the library and the driver source files if building the display version
+ifeq ($(TARGET),therm_with_display)
+    # 1. Add the BCM2835 library
+    LIBS += -lbcm2835
+    
+    # 2. Add the e-Paper driver sources
+    # (We include them here because they likely depend on the library. 
+    #  If we included them in the normal 'therm' build, the linker might error.)
+    DRIVER_SRCS = $(wildcard $(DRIVER_DIR)/Config/*.c) \
+                  $(wildcard $(DRIVER_DIR)/e-Paper/*.c) \
+                  $(wildcard $(DRIVER_DIR)/Fonts/*.c) \
+                  $(wildcard $(DRIVER_DIR)/GUI/*.c)
+    
+    SRCS += $(DRIVER_SRCS)
+    
+    # 3. Add driver headers to include path
+    INCLUDES += -I$(DRIVER_DIR)/Config \
+                -I$(DRIVER_DIR)/e-Paper \
+                -I$(DRIVER_DIR)/Fonts \
+                -I$(DRIVER_DIR)/GUI
+endif
+
+# Main Source file based on target
 MAIN_SRC = $(SRC_DIR)/$(TARGET).c
+SRCS += $(MAIN_SRC)
 
-# Combine all sources
-SRCS = $(COMMON_SRCS) $(DRIVER_SRCS) $(MAIN_SRC)
-
-# Generate object file names in the build directory, mirroring source structure
+# Generate object file names
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
-
-# Include paths (add all directories that contain .h files)
-INCLUDES = -I$(INC_DIR) \
-           -I$(DRIVER_DIR)/Config \
-           -I$(DRIVER_DIR)/e-Paper \
-           -I$(DRIVER_DIR)/Fonts \
-           -I$(DRIVER_DIR)/GUI
 
 # --- Rules ---
 
-# Default rule: build the executable
 all: $(OUTPUT_NAME)
 
-# Link the executable
 $(OUTPUT_NAME): $(OBJS)
-	@echo "Linking $@"
-	$(CC) $(OBJS) -o $@
+	@echo "Linking $@ (Target: $(TARGET))"
+	$(CC) $(OBJS) -o $@ $(LIBS)
 
-# Compile source files into object files
-# This generic rule handles .c -> .o for any directory structure
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-# Clean up build artifacts
 clean:
 	@echo "Cleaning up..."
 	rm -rf $(BUILD_DIR) $(OUTPUT_NAME)
 
-# Helper to debug variable values
 debug:
-	@echo "Target Main: $(MAIN_SRC)"
-	@echo "Common Srcs: $(COMMON_SRCS)"
-	@echo "Driver Srcs: $(DRIVER_SRCS)"
+	@echo "Target: $(TARGET)"
+	@echo "Libs:   $(LIBS)"
+	@echo "Sources: $(SRCS)"
 
 .PHONY: all clean debug
