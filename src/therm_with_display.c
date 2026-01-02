@@ -42,9 +42,6 @@ int main(void)
     Paint_NewImage(BlackImage, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 90, WHITE);
 	Paint_Clear(WHITE);
 
-	// Writing static text
-	
-	Paint_DrawString_EN(140, 15, "waveshare", &Font16, BLACK, WHITE);
 
 	
 	// Partial refresh
