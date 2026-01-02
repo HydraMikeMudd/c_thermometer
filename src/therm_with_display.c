@@ -96,8 +96,8 @@ int main(void)
 
 	// Writing static text
     Paint_DrawString_EN(TEXT_X_START, TEXT_Y_START, "Temp: ", &Font24, BLACK, WHITE);
-    Paint_DrawString_EN(TEXT_X_START, TEXT_Y_START + Font24.Height, "Hum:  ", &Font24, BLACK, WHITE);	
-    Paint_DrawString_EN(TEXT_X_START + (Font24.Width * 11), TEXT_Y_START, "°F", &Font24, BLACK, WHITE);
+    Paint_DrawString_EN(TEXT_X_START, (2 * TEXT_Y_START) + Font24.Height, "Hum:  ", &Font24, BLACK, WHITE);	
+    Paint_DrawString_EN(TEXT_X_START + (Font24.Width * 11), TEXT_Y_START, " F", &Font24, BLACK, WHITE);
     Paint_DrawString_EN(TEXT_X_START + (Font24.Width * 11), (2 * TEXT_Y_START) + Font24.Height, " %", &Font24, BLACK, WHITE);
 
     int counter = 0;
@@ -117,7 +117,7 @@ int main(void)
 		}
 		
     	snprintf(temp_buffer, sizeof(temp_buffer), "%.2f", sensor_data.temperature_f);
-    	snprintf(humidity_buffer, sizeof(humidity_buffer), "%.2f", sensor.data.humidity);
+    	snprintf(humidity_buffer, sizeof(humidity_buffer), "%.2f", sensor_data.humidity);
 
     	Paint_DrawString_EN(TEXT_X_START + (Font24.Width * 6), TEXT_Y_START, temp_buffer, &Font24, BLACK, WHITE);
     	Paint_DrawString_EN(TEXT_X_START + (Font24.Width * 6), (2 * TEXT_Y_START) + Font24.Height, humidity_buffer, &Font24, BLACK, WHITE);
