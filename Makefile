@@ -28,7 +28,7 @@ LIBS =
 # Only include the library and the driver source files if building the display version
 ifeq ($(TARGET),therm_with_display)
     # 1. Add the BCM2835 library
-    LIBS += -lbcm2835
+    LIBS += -llgpio -lm
     
     # 2. Add the e-Paper driver sources
     # (We include them here because they likely depend on the library. 
