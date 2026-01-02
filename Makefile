@@ -29,13 +29,13 @@ LIBS =
 ifeq ($(TARGET),therm_with_display)
     # 1. MACROS (Crucial Fix)
     # The original makefile defines these to tell the code to use the Pi hardware and BCM lib.
-    CFLAGS += -D RPI -D USE_BCM2835_LIB
+    CFLAGS += -D RPI -D USE_LGPIO_LIB
     
     # 2. LIBRARIES
     # -lbcm2835: The GPIO library
     # -lm: Math library
     # --gc-sections: Cleans up unused code
-    LIBS += -Wl,--gc-sections -lbcm2835 -lm
+    LIBS += -Wl,--gc-sections -llgpio -lm
     
     # 3. DRIVER SOURCES
     # We must be specific here. The original makefile only picks specific Config files

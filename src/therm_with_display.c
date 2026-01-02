@@ -1,6 +1,6 @@
 #include "DEV_Config.h"
 #include "GUI_Paint.h"
-#include "GUI_GMPfile.h"
+#include "GUI_BMPfile.h"
 #include "Debug.h"
 #include <stdlib.h>
 #include "EPD_2in13_V4.h"
