@@ -59,7 +59,7 @@ Before building, ensure you have the following installed:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/HydraMikeMudd/c_thermometer.git](https://github.com/HydraMikeMudd/c_thermometer.git)
+    git clone https://github.com/HydraMikeMudd/c_thermometer.git
     cd c_thermometer
     ```
 
