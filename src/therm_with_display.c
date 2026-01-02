@@ -44,37 +44,34 @@ int main(void)
 
 
 	
-	// Partial refresh
 	Paint_NewImage(BlackImage, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 90, WHITE);  
     Debug("Partial refresh\r\n");
     Paint_SelectImage(BlackImage);
 
 	// Writing static text
-    Paint_DrawString_EN(20, 20, "Temp: 52.76 F", &Font24, BLACK, WHITE);
-	
-    PAINT_TIME sPaint_time;
-    sPaint_time.Hour = 12;
-    sPaint_time.Min = 34;
-    sPaint_time.Sec = 56;
-    UBYTE num = 10;
-    for (;;) {
-        sPaint_time.Sec = sPaint_time.Sec + 1;
-        if (sPaint_time.Sec == 60) {
-            sPaint_time.Min = sPaint_time.Min + 1;
-            sPaint_time.Sec = 0;
-            if (sPaint_time.Min == 60) {
-                sPaint_time.Hour =  sPaint_time.Hour + 1;
-                sPaint_time.Min = 0;
-                if (sPaint_time.Hour == 24) {
-                    sPaint_time.Hour = 0;
-                    sPaint_time.Min = 0;
-                    sPaint_time.Sec = 0;
-                }
-            }
-        }
-        Paint_ClearWindows(150, 80, 150 + Font20.Width * 7, 80 + Font20.Height, WHITE);
-        Paint_DrawTime(150, 80, &sPaint_time, &Font20, WHITE, BLACK);
+    Paint_DrawString_EN(20, 20, "Temp: ", &Font24, BLACK, WHITE);
+    Paint_DrawString_EN(20, 40 * Font24.Height, "Hum:  ", &Font24, BLACK, WHITE);	
+    Paint_DrawString_EN(20 + Font24.Width * 11, 20, " F", &Font24, BLACK, WHITE);
+    Paint_DrawString_EN(20 + Font24.Width * 11, 40 + Font24.Height, " %", &Font24, BLACK, WHITE);
 
+    UBYTE num = 10;
+	float temp = 72.75f;
+	float humidity = 9.24f;
+
+	char temp_buffer[5];
+	char humidity_buffer[5];
+
+    for (;;) {
+        Paint_ClearWindows(20 + (Font24.Width * 6), 20, 20 + (Font24.Width * 11), 40 + (Font24.Height * 2), WHITE);
+		
+    	snprintf(temp_buffer, sizeof(temp_buffer), "%.2f", temp);
+    	snprintf(humidity_buffer, sizeof(humidity_buffer), "%.2f", humidity);
+
+    	Paint_DrawString_EN(20 + (Font24.Width * 6), 20, temp_buffer, &Font24, BLACK, WHITE);
+    	Paint_DrawString_EN(20 + (Font24.Width * 6), 40 + Font24.Height, humidity_buffer, &Font24, BLACK, WHITE);
+
+		temp++;
+		humidity++;
         num = num - 1;
         if(num == 0) {
             break;
