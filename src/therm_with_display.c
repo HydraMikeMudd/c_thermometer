@@ -50,16 +50,16 @@ int main(void)
 
 	// Writing static text
     Paint_DrawString_EN(20, 20, "Temp: ", &Font24, BLACK, WHITE);
-    Paint_DrawString_EN(20, 40 * Font24.Height, "Hum:  ", &Font24, BLACK, WHITE);	
+    Paint_DrawString_EN(20, 40 + Font24.Height, "Hum:  ", &Font24, BLACK, WHITE);	
     Paint_DrawString_EN(20 + Font24.Width * 11, 20, " F", &Font24, BLACK, WHITE);
     Paint_DrawString_EN(20 + Font24.Width * 11, 40 + Font24.Height, " %", &Font24, BLACK, WHITE);
 
     UBYTE num = 10;
 	float temp = 72.75f;
-	float humidity = 9.24f;
+	float humidity = 7.24f;
 
-	char temp_buffer[5];
-	char humidity_buffer[5];
+	char temp_buffer[6];
+	char humidity_buffer[6];
 
     for (;;) {
         Paint_ClearWindows(20 + (Font24.Width * 6), 20, 20 + (Font24.Width * 11), 40 + (Font24.Height * 2), WHITE);
@@ -77,7 +77,7 @@ int main(void)
             break;
         }
 		EPD_2in13_V4_Display_Partial(BlackImage);
-        DEV_Delay_ms(500);//Analog clock 1s
+        DEV_Delay_ms(2000);//Analog clock 1s
     }
 
 	// Clearing and closing connection
