@@ -47,6 +47,7 @@ int bme280_read_block_1_calib(i2c_device_t *device, bme280_calib_data_t *calib) 
 	return 0;
 }
 
+
 // Read second humidity calibration block
 int bme280_read_block_2_calib(i2c_device_t *device, bme280_calib_data_t *calib) {
 	uint8_t buffer[BME280_BLOCK_2_CALIB_LENGTH];
@@ -62,6 +63,7 @@ int bme280_read_block_2_calib(i2c_device_t *device, bme280_calib_data_t *calib) 
 
 	return 0;
 }
+
 
 // Configure BME280 sensor with desired settings and read calibration data
 int bme280_config(i2c_device_t *device, bme280_calib_data_t *calib) {
@@ -101,6 +103,7 @@ int32_t bme280_compensate_temp(int32_t adc_T, bme280_calib_data_t *calib, int32_
 	return T;
 }
 
+
 // Returns pressure in Pa * 256
 uint32_t bme280_compensate_press(int32_t adc_P, bme280_calib_data_t *calib, int32_t t_fine) {
 	int64_t var1, var2, p;
@@ -124,6 +127,7 @@ uint32_t bme280_compensate_press(int32_t adc_P, bme280_calib_data_t *calib, int3
 	return (uint32_t)p;
 }
 
+
 // Returns humidity in %RH * 1024
 uint32_t bme280_compensate_hum(int32_t adc_H, bme280_calib_data_t *calib, int32_t t_fine) {
 	int32_t v_x1_u32r;
@@ -139,6 +143,7 @@ uint32_t bme280_compensate_hum(int32_t adc_H, bme280_calib_data_t *calib, int32_
 float bme280_c_to_f(float c) {
 	return (c * 9.0f / 5.0f) + 32.0f;
 }
+
 
 // Read raw data from BME280 and apply compensation formulas, adding results to data struct
 int bme280_read_data(i2c_device_t *device, bme280_calib_data_t *calib, bme280_data_t *data) {
@@ -163,6 +168,7 @@ int bme280_read_data(i2c_device_t *device, bme280_calib_data_t *calib, bme280_da
 
 	return 0;
 }
+
 
 // Put BME280 sensor into sleep mode
 int bme280_sleep(i2c_device_t *device) {

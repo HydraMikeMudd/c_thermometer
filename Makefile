@@ -1,53 +1,72 @@
-# ==========================================
-# BME280 Driver Makefile
-# ==========================================
-
-# 1. Compiler Settings
+# Compiler settings
 CC = gcc
-CFLAGS = -Iinclude -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g
 
-# 2. File and Directory Settings
-# Your specific executable name
-TARGET = c_therm
+# Output executable name
+OUTPUT_NAME = c_therm
 
+# Default target main file (without extension)
+# Usage: make TARGET=therm_with_display
+TARGET ?= therm
+
+# Directories
 SRC_DIR = src
-OBJ_DIR = obj
+INC_DIR = include
+DRIVER_DIR = epaper_driver
+BUILD_DIR = build
 
-# This automatically finds src/therm.c and any other .c files in src/
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+# Source paths
+# 1. All .c files in src/ EXCLUDING the main targets (therm.c and therm_with_display.c)
+#    We filter them out specifically to avoid multiple definitions of 'main'.
+COMMON_SRCS = $(filter-out $(SRC_DIR)/therm.c $(SRC_DIR)/therm_with_display.c, $(wildcard $(SRC_DIR)/*.c))
 
-# Creates object paths like: obj/therm.o
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+# 2. All .c files in the driver subdirectories
+DRIVER_SRCS = $(wildcard $(DRIVER_DIR)/Config/*.c) \
+              $(wildcard $(DRIVER_DIR)/e-Paper/*.c) \
+              $(wildcard $(DRIVER_DIR)/Fonts/*.c) \
+              $(wildcard $(DRIVER_DIR)/GUI/*.c)
 
-# ==========================================
-# Build Rules
-# ==========================================
+# 3. The specific main file chosen by the TARGET variable
+MAIN_SRC = $(SRC_DIR)/$(TARGET).c
 
-all: $(TARGET)
+# Combine all sources
+SRCS = $(COMMON_SRCS) $(DRIVER_SRCS) $(MAIN_SRC)
 
-# Link the object files into the final executable
-$(TARGET): $(OBJS)
-	@echo "Linking $(TARGET)..."
+# Generate object file names in the build directory, mirroring source structure
+OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
+
+# Include paths (add all directories that contain .h files)
+INCLUDES = -I$(INC_DIR) \
+           -I$(DRIVER_DIR)/Config \
+           -I$(DRIVER_DIR)/e-Paper \
+           -I$(DRIVER_DIR)/Fonts \
+           -I$(DRIVER_DIR)/GUI
+
+# --- Rules ---
+
+# Default rule: build the executable
+all: $(OUTPUT_NAME)
+
+# Link the executable
+$(OUTPUT_NAME): $(OBJS)
+	@echo "Linking $@"
 	$(CC) $(OBJS) -o $@
 
 # Compile source files into object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	@echo "Compiling $<..."
-	$(CC) $(CFLAGS) -c $< -o $@
+# This generic rule handles .c -> .o for any directory structure
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-# Create the object directory if it doesn't exist
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
-
-# ==========================================
-# Utility Rules
-# ==========================================
-
-run: $(TARGET)
-	./$(TARGET)
-
+# Clean up build artifacts
 clean:
 	@echo "Cleaning up..."
-	rm -rf $(OBJ_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(OUTPUT_NAME)
 
-.PHONY: all clean run
+# Helper to debug variable values
+debug:
+	@echo "Target Main: $(MAIN_SRC)"
+	@echo "Common Srcs: $(COMMON_SRCS)"
+	@echo "Driver Srcs: $(DRIVER_SRCS)"
+
+.PHONY: all clean debug
