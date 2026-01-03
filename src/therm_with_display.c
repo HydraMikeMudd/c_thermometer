@@ -1,4 +1,5 @@
 #include "bme280_driver.h"
+#include "main_config.h"
 #include "DEV_Config.h"
 #include "GUI_Paint.h"
 #include "GUI_BMPfile.h"
@@ -10,12 +11,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-
-#define PRINTOUT_DELAY 2000
-#define I2C_BUS "/dev/i2c-1"
-#define TEXT_X_START 20
-#define TEXT_Y_START 20
-#define ITERATION_TIMEOUT 7200
 
 volatile int keep_running = 1;
 

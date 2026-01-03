@@ -11,7 +11,7 @@ TARGET ?= therm_with_display
 # Directories
 SRC_DIR = src
 INC_DIR = include
-DRIVER_DIR = epaper_driver
+DRIVER_DIR = src/epaper_driver
 BUILD_DIR = build
 
 # Base Includes
@@ -69,8 +69,8 @@ display:
 	$(MAKE) TARGET=therm_with_display
 	@echo "✅ Build complete: ./c_therm (with display support)"
 
-# "make no_display" forces TARGET=therm
-no_display:
+# "make headless" forces TARGET=therm
+headless:
 	$(MAKE) TARGET=therm
 	@echo "✅ Build complete: ./c_therm (sensor only)"
 
@@ -92,4 +92,4 @@ debug:
 	@echo "Target:  $(TARGET)"
 	@echo "Sources: $(SRCS)"
 
-.PHONY: all clean debug display no_display
+.PHONY: all clean debug display headless

@@ -9,7 +9,7 @@ This repo is for a small project to create a thermometer using some hobbiest par
 
 ## Parts
 
-* Raspberry Pi Zero 2 with Header (including accesories like power supply, SD card, case, etc.)
+* Raspberry Pi Zero 2 with Header (including accessories like power supply, SD card, case, etc.)
 * Inland 2.13 Inch E-Ink LCD Display Screen
 * SparkFun BME280 Temperature, Humidity, and Pressure Sensor
 * Female-to-Female Jumper Wires
@@ -83,7 +83,7 @@ sudo ./configure && sudo make && sudo make check && sudo make install
     ```bash
     make display
     # OR if you don't want to compile with display functionality:
-    make no_display
+    make headless
     ```
 
 3.  **Run the application:**
@@ -93,19 +93,19 @@ sudo ./configure && sudo make && sudo make check && sudo make install
 
 ## Configuration
 
-You can adjust the delay or timeout behavior of the thermometer by modifying values defined at top of therm.c or therm_with_display.c files:
+You can adjust the delay or timeout behavior of the thermometer by modifying values defined main_config.h file:
 
 * **`PRINTOUT_DELAY`**: Time in milliseconds between screen refreshes (default: `2000`).
 * **`I2C_BUS`**: Default BME280 bus is /dev/i2c-1. If different pins were used, modify this value.
-* **`ITERATION_TIMEOUT`**: Default timeout after 7200 iterations of refreshes.
+* **`ITERATION_TIMEOUT`**: Default timeout after 7200 iterations of refreshes. Each refresh runs for approximately PRINTOUT_DELAY milliseconds.
 
 For modifying the default BME280 config settings, see the bme280_driver.h file.
 
 
 ## Additional Resources
 
-BME280 Datasheet: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
-
+- BME280 Datasheet: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
+- e-Paper Driver is copied from Waveshare's Repo: https://github.com/waveshareteam/e-Paper
 
 ## 📄 License
 
