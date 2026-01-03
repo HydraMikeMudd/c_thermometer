@@ -39,8 +39,8 @@ ifeq ($(TARGET),therm_with_display)
     DRIVER_ASSETS = $(wildcard $(DRIVER_DIR)/Fonts/*.c) \
                     $(wildcard $(DRIVER_DIR)/GUI/*.c)
 
-    # Note: Ensure this wildcard only matches the driver file you need!
-    DRIVER_EPD = $(wildcard $(DRIVER_DIR)/e-Paper/*.c)
+    # Explicit driver file selection for EPD
+    DRIVER_EPD = $(DRIVER_DIR)/e-Paper/EPD_2in13_V4.c
 
     SRCS += $(DRIVER_CONFIG) $(DRIVER_ASSETS) $(DRIVER_EPD)
     

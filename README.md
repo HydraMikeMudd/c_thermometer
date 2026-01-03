@@ -6,6 +6,10 @@
 
 This repo is for a small project to create a thermometer using some hobbiest parts. It will include part information, setup instructions, and code for application/interfacing with hardware. There are two ways to run this project: with the specified E-Ink display or only the BME280 sensor to standard output.
 
+**Dependencies:**
+- **Headless mode** (sensor only): Requires only I2C support, no additional libraries needed.
+- **Display mode**: Requires the Waveshare E-Paper driver and lgpio library for GPIO control.
+
 
 ## Parts
 
@@ -32,8 +36,10 @@ For the Raspberry Pi pin out diagram, see the following: https://pinout.xyz/
 | SCL | GPIO 3 (Pin 5) | I2C Clock |
 
 
-For the BME280 to work, raspi-config will need to be updated to enable I2C through the Interfacing Options. After rebooting, install i2c-tools and verify the I2C address for the BME280 matches the one specified in the bme280_driver.h file.
+For the BME280 to work, raspi-config will need to be updated to enable I2C through the Interfacing Options. After rebooting, install i2c-tools and verify the I2C address for the BME280.
 
+**BME280 Address Detection:**
+The BME280 sensor can have two possible I2C addresses: 0x76 or 0x77. By default, the software will auto-detect the correct address by trying 0x76 first, then 0x77. If you know your sensor's specific address, you can set `BME280_ADDR_OVERRIDE` in `include/main_config.h` to either 0x76 or 0x77 to skip auto-detection. Set it to -1 to enable auto-detection.
 
 The config used for the BME280 is the following:
 - Temperature oversampling x2
@@ -91,17 +97,22 @@ sudo ./configure && sudo make && sudo make check && sudo make install
     ./c_therm
     ```
 
-Building for headless mode will output temperature, humidity, and pressure readings to the terminal instead of the E-Ink display. Unlike the display mode, headless mode does not require the gpiod or BCM2835 libraries as it uses the Linux I2C interface directly.
+Building for headless mode will output temperature (°C/°F), humidity (%), and pressure (hPa) readings to the terminal instead of the E-Ink display. Unlike the display mode, headless mode does not require the gpiod or BCM2835 libraries as it uses the Linux I2C interface directly.
+
+**Note:** The application includes proper resource cleanup and error handling. If sensor initialization or communication fails, all allocated resources will be properly released before the program exits.
 
 ## Configuration
 
 You can adjust the delay or timeout behavior of the thermometer by modifying values defined main_config.h file:
 
-* **`PRINTOUT_DELAY`**: Time in milliseconds between screen refreshes (default: `2000`).
+* **`PRINTOUT_DELAY`**: Time in milliseconds between screen refreshes (default: `2000`). In headless mode, this uses nanosleep for millisecond-accurate delays.
 * **`I2C_BUS`**: Default BME280 bus is /dev/i2c-1. If different pins were used, modify this value.
 * **`ITERATION_TIMEOUT`**: Default timeout after 7200 iterations of refreshes. Each refresh runs for approximately PRINTOUT_DELAY milliseconds.
+* **`BME280_ADDR_OVERRIDE`**: Set to -1 for auto-detection (tries 0x76 first, then 0x77), or set to 0x76/0x77 to force a specific I2C address.
 
 For modifying the default BME280 config settings, see the bme280_driver.h file.
+
+**Pressure Units:** The sensor outputs pressure in hectopascals (hPa), which is equivalent to millibars (mbar). Standard atmospheric pressure at sea level is approximately 1013.25 hPa.
 
 
 ## Additional Resources
