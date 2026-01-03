@@ -49,7 +49,7 @@ int main(void) {
 		}
 		printf("Temperature: %.2f °C or %.2f °F, Humidity: %.2f %%\n", sensor_data.temperature, sensor_data.temperature_f, sensor_data.humidity);
 		printf("Pressure: %.2f Pa\n", sensor_data.pressure);
-		sleep(PRINTOUT_DELAY);
+		sleep(PRINTOUT_DELAY/1000);
 	}
 
 
