@@ -24,10 +24,10 @@ For the Raspberry Pi pin out diagram, see the following: https://pinout.xyz/
 
 | BME280 Pin | Controller Pin | Description |
 | :--- | :--- | :--- |
-| VCC | [3.3V / Pin 1] | Power |
-| GND | [GND / Pin 6] | Ground |
-| SDA | [GPIO 2 / Pin 3] | I2C Data |
-| SCL | [GPIO 3 / Pin 5] | I2C Clock |
+| VCC | 3.3V (Pin 1) | Power |
+| GND | GND (Pin 6) | Ground |
+| SDA | GPIO 2 (Pin 3) | I2C Data |
+| SCL | GPIO 3 (Pin 5) | I2C Clock |
 
 
 For the BME280 to work, raspi-config will need to be updated to enable I2C through the Interfacing Options. After rebooting, install i2c-tools and verify the I2C address for the BME280 matches the one specified in the bme280_driver.h file.
@@ -54,6 +54,20 @@ Before building, ensure you have the following installed:
     * BCM2835 (If using the E-Ink display)
     * I2C/SPI tools (if using Linux: `i2c-tools`)
 
+**Example installation commands:**
+
+```bash
+sudo apt-get update
+sudo apt install gpiod libgpiod-dev i2c-tools
+
+# For BCM2835 library
+wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.71.tar.gz
+tar zxvf bcm2835-1.71.tar.gz
+cd bcm2835-1.71/
+sudo ./configure && sudo make && sudo make check && sudo make install
+# For more information, please refer to the official website: http://www.airspayce.com/mikem/bcm2835/
+```
+
 
 ## How to Build
 
@@ -66,7 +80,7 @@ Before building, ensure you have the following installed:
 2.  **Compile the code:**
     ```bash
     make TARGET=therm_with_display
-    # OR if you don't want to complile with display functionality:
+    # OR if you don't want to compile with display functionality:
     # make
     ```
 
