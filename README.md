@@ -91,6 +91,8 @@ sudo ./configure && sudo make && sudo make check && sudo make install
     ./c_therm
     ```
 
+Building for headless mode will output temperature, humidity, and pressure readings to the terminal instead of the E-Ink display. Unlike the display mode, headless mode does not require the gpiod or BCM2835 libraries as it uses the Linux I2C interface directly.
+
 ## Configuration
 
 You can adjust the delay or timeout behavior of the thermometer by modifying values defined main_config.h file:
