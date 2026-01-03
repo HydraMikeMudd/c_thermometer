@@ -1,5 +1,7 @@
 # c_thermometer
 
+<img src="images/setup.jpg" alt="Thermometer Setup" width="400"/>
+
 ## Overview
 
 This repo is for a small project to create a thermometer using some hobbiest parts. It will include part information, setup instructions, and code for application/interfacing with hardware. There are two ways to run this project: with the specified E-Ink display or only the BME280 sensor to standard output.
@@ -79,9 +81,9 @@ sudo ./configure && sudo make && sudo make check && sudo make install
 
 2.  **Compile the code:**
     ```bash
-    make TARGET=therm_with_display
+    make display
     # OR if you don't want to compile with display functionality:
-    # make
+    make no_display
     ```
 
 3.  **Run the application:**
