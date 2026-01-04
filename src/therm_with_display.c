@@ -15,6 +15,7 @@
 volatile int keep_running = 1;
 
 void handle_signal(int signal) {
+	(void)signal; // Suppress unused parameter warning
 	keep_running = 0;
 }
 
