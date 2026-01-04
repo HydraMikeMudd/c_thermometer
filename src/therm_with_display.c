@@ -118,8 +118,6 @@ int main(void)
 			goto cleanup;
 		}
 		
-		float pressure_hpa = sensor_data.pressure / 100.0f;
-		printf("Temperature: %.2f °F, Humidity: %.2f %%, Pressure: %.2f hPa\n", sensor_data.temperature_f, sensor_data.humidity, pressure_hpa);
 		
     	snprintf(temp_buffer, sizeof(temp_buffer), "%.2f", sensor_data.temperature_f);
     	snprintf(humidity_buffer, sizeof(humidity_buffer), "%.2f", sensor_data.humidity);

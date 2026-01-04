@@ -73,6 +73,8 @@ int i2c_register_read(i2c_device_t *device, uint8_t reg, uint8_t *buffer, int le
 }
 
 
+// Read from specified reg into provided buffer using repeated-start read. If success, returns 0. If failure during specifying reg
+// or during read of data, returns -1. If device or buffer are null, returns -2.
 int i2c_repeated_start_read(i2c_device_t *device, uint8_t reg, uint8_t *buffer, int length) {
 	if (device == NULL || buffer == NULL) {
 		return -2;
@@ -106,7 +108,7 @@ int i2c_repeated_start_read(i2c_device_t *device, uint8_t reg, uint8_t *buffer, 
 	return 0;
 }
 
-
+// Closes provided bus file descriptor
 int i2c_bus_close(int bus_fd) {
 	close(bus_fd);
 
