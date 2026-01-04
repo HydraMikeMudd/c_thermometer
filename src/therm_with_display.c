@@ -101,8 +101,10 @@ int main(void)
 
     int counter = 0;
 
-	char temp_buffer[10]; // Increased buffer size for edge values
-	char humidity_buffer[10]; // Increased buffer size for edge values
+	// Buffer sizes accommodate edge cases: e.g., "-999.99" (7 chars) + null terminator
+	// Using 10 bytes provides safe margin for any temperature/humidity formatting
+	char temp_buffer[10];
+	char humidity_buffer[10];
 
 	// Clearing only number values and writing new sensor values
 	while (keep_running && counter < ITERATION_TIMEOUT) {

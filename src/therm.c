@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <time.h>
+#include <errno.h>
 
 volatile int keep_running = 1;
 
@@ -61,10 +62,17 @@ int main(void) {
 		printf("Pressure: %.2f hPa\n", pressure_hpa);
 		
 		// Use nanosleep for millisecond precision
-		struct timespec sleep_time;
+		struct timespec sleep_time, remaining;
 		sleep_time.tv_sec = PRINTOUT_DELAY / 1000;
 		sleep_time.tv_nsec = (PRINTOUT_DELAY % 1000) * 1000000L;
-		nanosleep(&sleep_time, NULL);
+		
+		// Handle interrupted sleep
+		while (nanosleep(&sleep_time, &remaining) == -1) {
+			if (errno != EINTR) {
+				break; // Exit on errors other than interruption
+			}
+			sleep_time = remaining; // Continue sleeping with remaining time
+		}
 	}
 
 cleanup:
