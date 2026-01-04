@@ -1,17 +1,47 @@
 #include "bme280_driver.h"
+#include "main_config.h"
 #include <time.h>
+#include <stdio.h>
 
 
 // Initialize the I2C device and reset BME280 sensor
+// Supports auto-detection if BME280_ADDR_OVERRIDE is -1
 int bme280_connect(i2c_device_t *device) {
-	// Initialize I2C device
-	if (i2c_connect_device(device) != 0) {
-		return -1;
+	uint8_t addresses_to_try[2];
+	int num_addresses = 0;
+
+	// Determine which addresses to try
+	if (BME280_ADDR_OVERRIDE == -1) {
+		// Auto-detect: try 0x76 first, then 0x77
+		addresses_to_try[0] = 0x76;
+		addresses_to_try[1] = 0x77;
+		num_addresses = 2;
+	} else {
+		// Use specified address
+		addresses_to_try[0] = BME280_ADDR_OVERRIDE;
+		num_addresses = 1;
 	}
 
-	// Reset BME280 sensor
-	if (i2c_register_write(device, BME280_RESET_REG, BME280_RESET_CMD) != 0) {
-		return -2;
+	int connect_result = -1;
+	for (int i = 0; i < num_addresses; i++) {
+		device->device_address = addresses_to_try[i];
+		
+		// Try to connect to I2C device
+		if (i2c_connect_device(device) != 0) {
+			continue;
+		}
+
+		// Try to reset BME280 sensor
+		if (i2c_register_write(device, BME280_RESET_REG, BME280_RESET_CMD) != 0) {
+			continue;
+		}
+
+		// Connection successful
+		connect_result = 0;
+		if (BME280_ADDR_OVERRIDE == -1) {
+			printf("BME280 detected at address 0x%02X\n", addresses_to_try[i]);
+		}
+		break;
 	}
 
 	// Sleep for 5 ms to allow sensor to reset
@@ -20,14 +50,20 @@ int bme280_connect(i2c_device_t *device) {
 	req.tv_nsec = 5 * 1000000L; // 5 ms
 	nanosleep(&req, NULL);
 
-	return 0;
+	return connect_result;
 }
 
 // Read temp, pressure, and first humidity calibration block
 int bme280_read_block_1_calib(i2c_device_t *device, bme280_calib_data_t *calib) {
 	uint8_t buffer[BME280_BLOCK_1_CALIB_LENGTH];
-	if (i2c_register_read(device, BME280_BLOCK_1_CALIB_START, buffer, BME280_BLOCK_1_CALIB_LENGTH) != 0) {
-		return -1;
+	
+	// Try repeated-start read first, fall back to regular read if not available
+	int result = i2c_repeated_start_read(device, BME280_BLOCK_1_CALIB_START, buffer, BME280_BLOCK_1_CALIB_LENGTH);
+	if (result != 0) {
+		result = i2c_register_read(device, BME280_BLOCK_1_CALIB_START, buffer, BME280_BLOCK_1_CALIB_LENGTH);
+		if (result != 0) {
+			return -1;
+		}
 	}
 
 	calib->dig_T1 = (uint16_t)(buffer[1] << 8 | buffer[0]);
@@ -51,8 +87,14 @@ int bme280_read_block_1_calib(i2c_device_t *device, bme280_calib_data_t *calib) 
 // Read second humidity calibration block
 int bme280_read_block_2_calib(i2c_device_t *device, bme280_calib_data_t *calib) {
 	uint8_t buffer[BME280_BLOCK_2_CALIB_LENGTH];
-	if (i2c_register_read(device, BME280_BLOCK_2_CALIB_START, buffer, BME280_BLOCK_2_CALIB_LENGTH) != 0) {
-		return -1;
+	
+	// Try repeated-start read first, fall back to regular read if not available
+	int result = i2c_repeated_start_read(device, BME280_BLOCK_2_CALIB_START, buffer, BME280_BLOCK_2_CALIB_LENGTH);
+	if (result != 0) {
+		result = i2c_register_read(device, BME280_BLOCK_2_CALIB_START, buffer, BME280_BLOCK_2_CALIB_LENGTH);
+		if (result != 0) {
+			return -1;
+		}
 	}
 
 	calib->dig_H2 = (int16_t)(buffer[1] << 8 | buffer[0]);
@@ -148,8 +190,14 @@ float bme280_c_to_f(float c) {
 // Read raw data from BME280 and apply compensation formulas, adding results to data struct
 int bme280_read_data(i2c_device_t *device, bme280_calib_data_t *calib, bme280_data_t *data) {
 	uint8_t buffer[BME280_REG_DATA_LENGTH];
-	if (i2c_register_read(device, BME280_REG_DATA_START, buffer, BME280_REG_DATA_LENGTH) != 0) {
-		return -1;
+	
+	// Try repeated-start read first, fall back to regular read if not available
+	int result = i2c_repeated_start_read(device, BME280_REG_DATA_START, buffer, BME280_REG_DATA_LENGTH);
+	if (result != 0) {
+		result = i2c_register_read(device, BME280_REG_DATA_START, buffer, BME280_REG_DATA_LENGTH);
+		if (result != 0) {
+			return -1;
+		}
 	}
 
 	int32_t adc_P = (int32_t)((((uint32_t)(buffer[0]) << 12) | ((uint32_t)(buffer[1]) << 4) | ((uint32_t)(buffer[2]) >> 4)));

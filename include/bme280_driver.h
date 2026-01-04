@@ -3,7 +3,6 @@
 
 #include "i2c_protocol.h"
 
-#define BME280_I2C_ADDR 0x77
 #define BME280_RESET_REG 0xE0
 #define BME280_RESET_CMD 0xB6
 #define BME280_CTRL_HUM_REG 0xF2

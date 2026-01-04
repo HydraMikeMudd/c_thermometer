@@ -15,22 +15,33 @@
 volatile int keep_running = 1;
 
 void handle_signal(int signal) {
+	(void)signal; // Suppress unused parameter warning
 	keep_running = 0;
 }
 
 
 int main(void)
 {
+	int rc = 0;
+	int bus_fd = -1;
+	UBYTE *BlackImage = NULL;
+	i2c_device_t bme280_device = {0};
+	bme280_calib_data_t calib_data;
+	int device_connected = 0;
+	int epd_initialized = 0;
+	int module_initialized = 0;
 	
 	// E-Ink Initialization
     Debug("EPD_2in13 Thermometer\r\n");
     if(DEV_Module_Init()!=0){
-        return 1;
+        rc = 1;
+        goto cleanup;
     }
+	module_initialized = 1;
 
     Debug("e-Paper Init and Clear...\r\n");
 	EPD_2in13_V4_Init();
-
+	epd_initialized = 1;
 
 	struct timespec start={0,0}, finish={0,0}; 
     clock_gettime(CLOCK_REALTIME,&start);
@@ -38,52 +49,45 @@ int main(void)
 	clock_gettime(CLOCK_REALTIME,&finish);
     Debug("%ld S\r\n",finish.tv_sec-start.tv_sec);	
 
-    UBYTE *BlackImage;
     UWORD Imagesize = ((EPD_2in13_V4_WIDTH % 8 == 0)? (EPD_2in13_V4_WIDTH / 8 ): (EPD_2in13_V4_WIDTH / 8 + 1)) * EPD_2in13_V4_HEIGHT;
     if((BlackImage = (UBYTE *)malloc(Imagesize)) == NULL) {
         Debug("Failed to apply for black memory...\r\n");
-        return 1;
+        rc = 1;
+        goto cleanup;
     }
     Debug("Paint_NewImage\r\n");
     Paint_NewImage(BlackImage, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 90, WHITE);
 	Paint_Clear(WHITE);
 
-
-
-
-	
 	// BME280 Initialization
 	printf("Initializing I2C bus...\n");
-	int bus_fd = i2c_bus_init(I2C_BUS);
+	bus_fd = i2c_bus_init(I2C_BUS);
 	if (bus_fd < 0) {
 		printf("Failed to initialize I2C bus\n");
-		return 1;
+		rc = 1;
+		goto cleanup;
 	}
 
 	printf("Connecting to BME280 device...\n");
-	i2c_device_t bme280_device;
 	bme280_device.bus_fd = bus_fd;
-	bme280_device.device_address = BME280_I2C_ADDR;
+	bme280_device.device_address = 0x00; // Will be set by bme280_connect
 	
 	int result = bme280_connect(&bme280_device);
 	if (result < 0) {
 		printf("Failed to connect to BME280 device. Error Code: %d\n", result);
-		return 1;
+		rc = 1;
+		goto cleanup;
 	}
+	device_connected = 1;
 
 	printf("Configuring BME280 device...\n");
-	bme280_calib_data_t calib_data;
 	if (bme280_config(&bme280_device, &calib_data) < 0) {
 		printf("Failed to configure BME280 device\n");
-		return 1;
+		rc = 1;
+		goto cleanup;
 	}
 
 	signal(SIGINT, handle_signal);
-
-	
-
-
-
 
 	// -- MAIN ITERATION -- 
 	Paint_NewImage(BlackImage, EPD_2in13_V4_WIDTH, EPD_2in13_V4_HEIGHT, 90, WHITE);  
@@ -97,8 +101,10 @@ int main(void)
 
     int counter = 0;
 
-	char temp_buffer[6]; // Only allow 4 digits and a period (ex. 24.54)
-	char humidity_buffer[6]; // Only allow 4 digits and a period (ex. 24.54)
+	// Buffer sizes accommodate edge cases: e.g., "-999.99" (7 chars) + null terminator
+	// Using 10 bytes provides safe margin for any temperature/humidity formatting
+	char temp_buffer[10];
+	char humidity_buffer[10];
 
 	// Clearing only number values and writing new sensor values
 	while (keep_running && counter < ITERATION_TIMEOUT) {
@@ -108,8 +114,10 @@ int main(void)
 		bme280_data_t sensor_data;
 		if (bme280_read_data(&bme280_device, &calib_data, &sensor_data) < 0) {
 			printf("Failed to read data from BME280 device\n");
-			return 1;
+			rc = 1;
+			goto cleanup;
 		}
+		
 		
     	snprintf(temp_buffer, sizeof(temp_buffer), "%.2f", sensor_data.temperature_f);
     	snprintf(humidity_buffer, sizeof(humidity_buffer), "%.2f", sensor_data.humidity);
@@ -122,28 +130,39 @@ int main(void)
         DEV_Delay_ms(PRINTOUT_DELAY);
     }
 
-
-
-
-	
+cleanup:
 	// CLEANING UP
-	Debug("Clear...\r\n");
-	EPD_2in13_V4_Init();
-    EPD_2in13_V4_Clear();
+	if (epd_initialized) {
+		Debug("Clear...\r\n");
+		EPD_2in13_V4_Init();
+		EPD_2in13_V4_Clear();
+		
+		Debug("Goto Sleep...\r\n");
+		EPD_2in13_V4_Sleep();
+		DEV_Delay_ms(2000);//important, at least 2s
+	}
 	
-    Debug("Goto Sleep...\r\n");
-    EPD_2in13_V4_Sleep();
-    free(BlackImage);
-    BlackImage = NULL;
-    DEV_Delay_ms(2000);//important, at least 2s
-    // close 5V
-    Debug("close 5V, Module enters 0 power consumption ...\r\n");
-    DEV_Module_Exit();
+	if (BlackImage != NULL) {
+		free(BlackImage);
+		BlackImage = NULL;
+	}
 	
+	if (module_initialized) {
+		// close 5V
+		Debug("close 5V, Module enters 0 power consumption ...\r\n");
+		DEV_Module_Exit();
+	}
 
-	bme280_sleep(&bme280_device);
-	i2c_bus_close(bus_fd);
+	// Put sensor to sleep if it was connected
+	if (device_connected) {
+		bme280_sleep(&bme280_device);
+	}
+	
+	// Close I2C bus if it was opened
+	if (bus_fd >= 0) {
+		i2c_bus_close(bus_fd);
+	}
+	
 	printf("Exiting program.\n");
-    return 0;
+    return rc;
 }
-

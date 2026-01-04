@@ -10,7 +10,7 @@ typedef struct {
 } i2c_device_t;
 
 
-int i2c_bus_init(char *bus_name);
+int i2c_bus_init(const char *bus_name);
 int i2c_connect_device(i2c_device_t *device);
 int i2c_register_write(i2c_device_t *device, uint8_t reg, uint8_t value);
 int i2c_register_read(i2c_device_t *device, uint8_t reg, uint8_t *buffer, int length);
