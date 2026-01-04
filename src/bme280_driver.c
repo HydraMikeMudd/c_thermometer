@@ -36,12 +36,6 @@ int bme280_connect(i2c_device_t *device) {
 			continue;
 		}
 
-		// Sleep for 5 ms to allow sensor to reset
-		struct timespec req = {0};
-		req.tv_sec = 0;
-		req.tv_nsec = 5 * 1000000L; // 5 ms
-		nanosleep(&req, NULL);
-
 		// Connection successful
 		connect_result = 0;
 		if (BME280_ADDR_OVERRIDE == -1) {
@@ -53,6 +47,12 @@ int bme280_connect(i2c_device_t *device) {
 	if (connect_result != 0) {
 		return -1;
 	}
+
+	// Sleep for 5 ms to allow sensor to reset
+	struct timespec req = {0};
+	req.tv_sec = 0;
+	req.tv_nsec = 5 * 1000000L; // 5 ms
+	nanosleep(&req, NULL);
 
 	return 0;
 }
